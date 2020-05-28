@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм» [![Build status][travis-image]][travis-url]
 
 * Студент: [Владимир Якубович](https://up.htmlacademy.ru/javascript/20/user/34338).
-* Наставник: `Неизвестно`.
+* Наставник: `Иван Чернобук`.
 
 ---
 
