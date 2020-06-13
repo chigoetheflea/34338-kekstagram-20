@@ -40,6 +40,7 @@ var MIN_LIKES = 15;
 var MAX_LIKES = 200;
 var MIN_AVATAR_NUMBER = 1;
 var MAX_AVATAR_NUMBER = 6;
+var AVATAR_SIZE = 35;
 
 var getRandomValue = function (arr) {
   var randomIndex = Math.floor(Math.random() * arr.length);
@@ -62,6 +63,7 @@ var getMessage = function (count) {
     firstSentence = firstSentence + ' ' + secondSentence;
   }
 
+  return firstSentence;
 };
 
 var getComments = function () {
@@ -103,7 +105,6 @@ var getShuffledArray = function (arr) {
   for (var i = arr.length - 1; i > 0; i--) {
     var randomIndex = Math.floor(Math.random() * (i + 1));
     var buffer = arr[i];
-    // тут пытался через деструктуризацию сделать, но линтер не пропускает
     arr[i] = arr[randomIndex];
     arr[randomIndex] = buffer;
   }
@@ -135,3 +136,60 @@ var createFragment = function (data, template) {
 };
 
 document.querySelector('.pictures').appendChild(createFragment(imagesData, pictureTemplate));
+
+var renderComment = function (data) {
+  var comment = document.createElement('li');
+  comment.classList.add('social__comment');
+
+  var commentAvatar = document.createElement('img');
+  commentAvatar.classList.add('social__picture');
+  commentAvatar.src = data.avatar;
+  commentAvatar.alt = data.name;
+  commentAvatar.width = AVATAR_SIZE;
+  commentAvatar.height = AVATAR_SIZE;
+
+  var commentText = document.createElement('p');
+  commentText.classList.add('social__text');
+  commentText.textContent = data.message;
+
+  comment.appendChild(commentAvatar);
+  comment.appendChild(commentText);
+
+  return comment;
+};
+
+var renderModalWindowContent = function (modal, data) {
+  var bigPicture = modal.querySelector('.big-picture__img img');
+  var likesCount = modal.querySelector('.likes-count');
+  var commentsCount = modal.querySelector('.comments-count');
+  var commentsContainer = modal.querySelector('.social__comments');
+
+  bigPicture.src = data.url;
+  bigPicture.alt = data.description;
+
+  likesCount.textContent = data.likes;
+  commentsCount.textContent = data.comments.length;
+
+  commentsContainer.innerHTML = '';
+
+  var commentsFragment = document.createDocumentFragment();
+
+  for (var i = 0; i < data.comments.length; i++) {
+    commentsFragment.appendChild(renderComment(data.comments[i]));
+  }
+
+  commentsContainer.appendChild(commentsFragment);
+};
+
+var showModal = function (data) {
+  var modalWindow = document.querySelector('.big-picture');
+
+  renderModalWindowContent(modalWindow, data);
+
+  modalWindow.querySelector('.social__comment-count').classList.add('hidden');
+  modalWindow.querySelector('.comments-loader').classList.add('hidden');
+  document.querySelector('body').classList.add('modal-open');
+  modalWindow.classList.remove('hidden');
+};
+
+showModal(imagesData[0]);
