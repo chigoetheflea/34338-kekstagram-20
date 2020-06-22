@@ -50,10 +50,18 @@ var TAG_MAX_LENGTH = 20;
 var MAX_TAGS_COUNT = 5;
 var TAG_SYMBOL = '#';
 
-var setBodyStatus = function (flag) {
-  var tagBody = document.querySelector('body');
+var effectNames = {
+  CHROME: 'chrome',
+  SEPIA: 'sepia',
+  MARVIN: 'marvin',
+  PHOBOS: 'phobos',
+  HEAT: 'heat'
+};
 
-  // (flag) ? tagBody.classList.add('modal-open') : tagBody.classList.remove('modal-open');
+var tagBody = document.querySelector('body');
+var modalPictureWindow = document.querySelector('.big-picture');
+
+var setBodyStatus = function (flag) {
   if (flag) {
     tagBody.classList.add('modal-open');
   } else {
@@ -201,25 +209,19 @@ var renderModalWindowContent = function (modal, data) {
 };
 
 var showModalPicture = function (data) {
-  var modalWindow = document.querySelector('.big-picture');
+  renderModalWindowContent(modalPictureWindow, data);
 
-  renderModalWindowContent(modalWindow, data);
-
-  modalWindow.querySelector('.social__comment-count').classList.add('hidden');
-  modalWindow.querySelector('.comments-loader').classList.add('hidden');
+  modalPictureWindow.querySelector('.social__comment-count').classList.add('hidden');
+  modalPictureWindow.querySelector('.comments-loader').classList.add('hidden');
 
   setBodyStatus(true);
 
-  modalWindow.classList.remove('hidden');
+  modalPictureWindow.classList.remove('hidden');
 };
 
-// showModalPicture();
+var pictures = document.querySelector('.pictures');
 
-// ------------------
-
-var otherUsersPictures = document.querySelector('.pictures');
-
-otherUsersPictures.addEventListener('click', function (evt) {
+pictures.addEventListener('click', function (evt) {
   if (evt.target.classList.contains('picture__img')) {
     showModalPicture(imagesData[0]); // Это пока что, т.к. линтер ругается на отсутствие использования showModalPicture
   }
@@ -238,7 +240,7 @@ var scaleField = scaleControls.querySelector('.scale__control--value');
 
 var effectsList = modalUploadWindow.querySelector('.effects__list');
 var effectLevelSlider = modalUploadWindow.querySelector('.effect-level');
-var effectLevelHandle = effectLevelSlider.querySelector('.effect-level__pin');
+var effectLevelLever = effectLevelSlider.querySelector('.effect-level__pin');
 var effectLevelBar = effectLevelSlider.querySelector('.effect-level__line');
 var effectLevelDepth = effectLevelSlider.querySelector('.effect-level__depth');
 var effectLevelField = effectLevelSlider.querySelector('.effect-level__value');
@@ -330,22 +332,22 @@ var fadePictureEffect = function (value) {
   var effectClass = (uploadedPicturePreview.className).split('--')[1];
 
   switch (effectClass) {
-    case 'chrome':
+    case effectNames.CHROME:
       return 'filter: grayscale(' + value / 100 + ')';
-    case 'sepia':
+    case effectNames.SEPIA:
       return 'filter: sepia(' + value / 100 + ')';
-    case 'marvin':
+    case effectNames.MARVIN:
       return 'filter: invert(' + value + '%)';
-    case 'phobos':
+    case effectNames.PHOBOS:
       return 'filter: blur(' + Math.floor(3 * value / 100) + 'px)';
-    case 'heat':
+    case effectNames.HEAT:
       return 'filter: brightness(' + (Math.floor(value / 50) + 1) + ')';
   }
 
   return '';
 };
 
-var moveEffectLevelHandle = function (offset) {
+var moveEffectLevelLever = function (offset) {
   var effectLevelBarWidth = effectLevelBar.offsetWidth;
 
   if (offset === effectLevelBarWidth) {
@@ -361,31 +363,31 @@ var moveEffectLevelHandle = function (offset) {
   }
 
   effectLevelDepth.style.width = newEffectValue + '%';
-  effectLevelHandle.style.left = newEffectValue + '%';
+  effectLevelLever.style.left = newEffectValue + '%';
 
   effectLevelField.value = newEffectValue;
 
   uploadedPicturePreview.style = getPictureStyleAtt(fadePictureEffect(newEffectValue), 'filter');
 };
 
-var onEffectLevelHandlePress = function (evt) {
+var onEffectLevelLeverPress = function (evt) {
   var startOffset = evt.clientX;
 
-  var onEffectLevelHandleMove = function (evtMove) {
+  var onEffectLevelLeverMove = function (evtMove) {
     var newOffset = evtMove.clientX;
 
-    moveEffectLevelHandle(startOffset - newOffset);
+    moveEffectLevelLever(startOffset - newOffset);
 
     startOffset = newOffset;
   };
 
-  var onEffectLevelHandleRelease = function () {
-    document.removeEventListener('mousemove', onEffectLevelHandleMove);
-    document.removeEventListener('mouseup', onEffectLevelHandleRelease);
+  var onEffectLevelLeverRelease = function () {
+    document.removeEventListener('mousemove', onEffectLevelLeverMove);
+    document.removeEventListener('mouseup', onEffectLevelLeverRelease);
   };
 
-  document.addEventListener('mousemove', onEffectLevelHandleMove);
-  document.addEventListener('mouseup', onEffectLevelHandleRelease);
+  document.addEventListener('mousemove', onEffectLevelLeverMove);
+  document.addEventListener('mouseup', onEffectLevelLeverRelease);
 };
 
 /* effects */
@@ -402,7 +404,7 @@ var applyPictureEffect = function (effectName) {
     effectLevelSlider.classList.remove('hidden');
   }
 
-  moveEffectLevelHandle(effectLevelBar.offsetWidth);
+  moveEffectLevelLever(effectLevelBar.offsetWidth);
 };
 
 var onEffectPress = function (evt) {
@@ -462,7 +464,7 @@ var openUploadWindow = function () {
   scaleControls.addEventListener('click', onScalePress);
   effectsList.addEventListener('click', onEffectPress);
   tagsInputField.addEventListener('input', onTagsInput);
-  effectLevelHandle.addEventListener('mousedown', onEffectLevelHandlePress);
+  effectLevelLever.addEventListener('mousedown', onEffectLevelLeverPress);
 };
 
 var closeUploadWindow = function () {
@@ -474,13 +476,17 @@ var closeUploadWindow = function () {
   document.removeEventListener('keydown', onPopupEscPress);
   scaleControls.removeEventListener('click', onScalePress);
   effectsList.removeEventListener('click', onEffectPress);
-  effectLevelHandle.removeEventListener('mousedown', onEffectLevelHandlePress);
+  effectLevelLever.removeEventListener('mousedown', onEffectLevelLeverPress);
 };
 
-uploadPictureField.addEventListener('change', function () {
+var onUploadPictureFieldChange = function () {
   openUploadWindow();
-});
+};
 
-uploadWindowCloseButton.addEventListener('click', function () {
+uploadPictureField.addEventListener('change', onUploadPictureFieldChange);
+
+var onUploadWindowClosePress = function () {
   closeUploadWindow();
-});
+};
+
+uploadWindowCloseButton.addEventListener('click', onUploadWindowClosePress);
