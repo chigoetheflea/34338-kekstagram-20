@@ -49,8 +49,12 @@ var DEFAULT_EFFECT_VALUE = 100;
 var TAG_MAX_LENGTH = 20;
 var MAX_TAGS_COUNT = 5;
 var TAG_SYMBOL = '#';
+var MIN_COMMENT_SENTENSES = 1;
+var MAX_COMMENT_SENTENSES = 2;
+var MAX_DESCRIPTION_LENGTH = 140;
+var MAX_DESRIPTION_THRESHOLD = 125;
 
-var effectNames = {
+var EffectName = {
   CHROME: 'chrome',
   SEPIA: 'sepia',
   MARVIN: 'marvin',
@@ -59,7 +63,13 @@ var effectNames = {
 };
 
 var tagBody = document.querySelector('body');
-var modalPictureWindow = document.querySelector('.big-picture');
+
+var bigPictureWindow = document.querySelector('.big-picture');
+var bigPicture = bigPictureWindow.querySelector('.big-picture__img img');
+var likesCount = bigPictureWindow.querySelector('.likes-count');
+var commentsCount = bigPictureWindow.querySelector('.comments-count');
+var commentsContainer = bigPictureWindow.querySelector('.social__comments');
+var bigPictureCancelButton = bigPictureWindow.querySelector('.big-picture__cancel');
 
 var setBodyStatus = function (flag) {
   if (flag) {
@@ -81,8 +91,9 @@ var getRandomNumber = function (min, max) {
 
 var getMessage = function (count) {
   var firstSentence = getRandomValue(COMMENT_MESSAGES);
+  var isMaxCommentSentenses = count === MAX_COMMENT_SENTENSES;
 
-  if (count === 2) {
+  if (isMaxCommentSentenses) {
     do {
       var secondSentence = getRandomValue(COMMENT_MESSAGES);
     } while (secondSentence === firstSentence);
@@ -95,10 +106,10 @@ var getMessage = function (count) {
 
 var getComments = function () {
   var comments = [];
-  var commentsCount = getRandomNumber(0, COMMENTS_COUNT);
-  var sentensesCount = Math.random() > 0.5 ? 2 : 1;
+  var commentsRandomCount = getRandomNumber(0, COMMENTS_COUNT);
+  var sentensesCount = Math.random() > 0.5 ? MAX_COMMENT_SENTENSES : MIN_COMMENT_SENTENSES;
 
-  for (var i = 0; i < commentsCount; i++) {
+  for (var i = 0; i < commentsRandomCount; i++) {
     var commentsItem = {
       avatar: 'img/avatar-' + getRandomNumber(MIN_AVATAR_NUMBER, MAX_AVATAR_NUMBER) + '.svg',
       message: getMessage(sentensesCount),
@@ -164,6 +175,8 @@ var createFragment = function (data, template) {
 
 document.querySelector('.pictures').appendChild(createFragment(imagesData, pictureTemplate));
 
+var pictures = document.querySelectorAll('.picture');
+
 var renderComment = function (data) {
   var comment = document.createElement('li');
   comment.classList.add('social__comment');
@@ -185,12 +198,7 @@ var renderComment = function (data) {
   return comment;
 };
 
-var renderModalWindowContent = function (modal, data) {
-  var bigPicture = modal.querySelector('.big-picture__img img');
-  var likesCount = modal.querySelector('.likes-count');
-  var commentsCount = modal.querySelector('.comments-count');
-  var commentsContainer = modal.querySelector('.social__comments');
-
+var renderBigPicturelContent = function (data) {
   bigPicture.src = data.url;
   bigPicture.alt = data.description;
 
@@ -208,44 +216,77 @@ var renderModalWindowContent = function (modal, data) {
   commentsContainer.appendChild(commentsFragment);
 };
 
-var showModalPicture = function (data) {
-  renderModalWindowContent(modalPictureWindow, data);
+var showBigPicture = function (data) {
+  renderBigPicturelContent(data);
 
-  modalPictureWindow.querySelector('.social__comment-count').classList.add('hidden');
-  modalPictureWindow.querySelector('.comments-loader').classList.add('hidden');
+  bigPictureWindow.querySelector('.social__comment-count').classList.add('hidden');
+  bigPictureWindow.querySelector('.comments-loader').classList.add('hidden');
 
   setBodyStatus(true);
 
-  modalPictureWindow.classList.remove('hidden');
+  bigPictureWindow.classList.remove('hidden');
 };
 
-var pictures = document.querySelector('.pictures');
+/* big picture opening */
 
-pictures.addEventListener('click', function (evt) {
-  if (evt.target.classList.contains('picture__img')) {
-    showModalPicture(imagesData[0]); // Это пока что, т.к. линтер ругается на отсутствие использования showModalPicture
+var closePictureWindow = function () {
+  bigPictureWindow.classList.add('hidden');
+
+  setBodyStatus();
+
+  document.removeEventListener('keydown', onPictureWindowEscPress);
+  bigPictureCancelButton.removeEventListener('click', onPictureWindowCancelPress);
+};
+
+var onPictureWindowEscPress = function (evt) {
+  var isEscKey = evt.key === 'Escape';
+
+  if (isEscKey) {
+    evt.preventDefault();
+
+    closePictureWindow();
   }
-});
+};
+
+var onPictureWindowCancelPress = function () {
+  closePictureWindow();
+};
+
+var openPictureWindow = function (data) {
+  showBigPicture(data);
+
+  setBodyStatus(true);
+
+  document.addEventListener('keydown', onPictureWindowEscPress);
+  bigPictureCancelButton.addEventListener('click', onPictureWindowCancelPress);
+};
+
+for (var i = 0; i < pictures.length; i++) {
+  pictures[i].addEventListener('click', openPictureWindow.bind(null, imagesData[i]));
+}
+
+/* big picture opening */
 
 var uploadPictureField = document.querySelector('#upload-file');
 
-var modalUploadWindow = document.querySelector('.img-upload__overlay');
-var uploadWindowCloseButton = modalUploadWindow.querySelector('#upload-cancel');
-var uploadedPicturePreview = modalUploadWindow.querySelector('.img-upload__preview img');
+var uploadWindow = document.querySelector('.img-upload__overlay');
+var uploadWindowCloseButton = uploadWindow.querySelector('#upload-cancel');
+var uploadedPicturePreview = uploadWindow.querySelector('.img-upload__preview img');
 
-var scaleControls = modalUploadWindow.querySelector('.img-upload__scale');
+var scaleControls = uploadWindow.querySelector('.img-upload__scale');
 var scaleSmallerButton = scaleControls.querySelector('.scale__control--smaller');
 var scaleBiggerButon = scaleControls.querySelector('.scale__control--bigger');
 var scaleField = scaleControls.querySelector('.scale__control--value');
 
-var effectsList = modalUploadWindow.querySelector('.effects__list');
-var effectLevelSlider = modalUploadWindow.querySelector('.effect-level');
+var effectsList = uploadWindow.querySelector('.effects__list');
+var effectLevelSlider = uploadWindow.querySelector('.effect-level');
 var effectLevelLever = effectLevelSlider.querySelector('.effect-level__pin');
 var effectLevelBar = effectLevelSlider.querySelector('.effect-level__line');
 var effectLevelDepth = effectLevelSlider.querySelector('.effect-level__depth');
 var effectLevelField = effectLevelSlider.querySelector('.effect-level__value');
 
-var tagsInputField = modalUploadWindow.querySelector('.text__hashtags');
+var tagsInputField = uploadWindow.querySelector('.text__hashtags');
+var descriptionInputField = uploadWindow.querySelector('.text__description');
 
 var getPictureStyleAtt = function (style, type) {
   var currentStyle = uploadedPicturePreview.getAttribute('style');
@@ -254,8 +295,10 @@ var getPictureStyleAtt = function (style, type) {
     var currentSplittedStyle = deleteArrayElements(currentStyle.split(';'), '');
     var newStyle = [];
 
-    for (var i = 0; i < currentSplittedStyle.length; i++) {
-      if (!currentSplittedStyle[i].includes(type)) {
+    for (i = 0; i < currentSplittedStyle.length; i++) {
+      var isCurrentStyleIncludes = currentSplittedStyle[i].includes(type);
+
+      if (!isCurrentStyleIncludes) {
         newStyle.push(currentSplittedStyle[i] + ';');
       }
     }
@@ -273,8 +316,10 @@ var getPictureStyleAtt = function (style, type) {
 var deleteArrayElements = function (arr, valueToDelete) {
   var cleanArr = [];
 
-  for (var i = 0; i < arr.length; i++) {
-    if (arr[i] !== valueToDelete) {
+  for (i = 0; i < arr.length; i++) {
+    var isValueToDelete = arr[i] === valueToDelete;
+
+    if (!isValueToDelete) {
       cleanArr.push(arr[i]);
     }
   }
@@ -286,30 +331,35 @@ var getTagsValidityMessage = function (tags) {
   var splittedTags = deleteArrayElements(tags.split(' '), '');
   var wrongSymbolsRegExp = /\W/;
   var acceptedTags = [];
+  var isMaxTagsCount = splittedTags.length > MAX_TAGS_COUNT;
 
-  if (splittedTags.length > MAX_TAGS_COUNT) {
-    return 'Вы указали слишком много хэштегов (максимум - ' + MAX_TAGS_COUNT + ')';
+  if (isMaxTagsCount) {
+    return 'Вы указали слишком много хэштегов (макс. ' + MAX_TAGS_COUNT + ')';
   }
 
-  for (var i = 0; i < splittedTags.length; i++) {
+  for (i = 0; i < splittedTags.length; i++) {
     var tag = splittedTags[i].toLowerCase();
+    var tagText = tag.slice(1);
 
-    if (tag.charAt(0) !== TAG_SYMBOL) {
+    var isHashTag = tag.charAt(0) === TAG_SYMBOL;
+    var isTagTooShort = tag.length === 1;
+    var isTagTooLong = splittedTags[i].length > TAG_MAX_LENGTH;
+    var isTagExists = acceptedTags.indexOf(tag) !== -1;
+    var isWrongTag = wrongSymbolsRegExp.test(tagText);
+
+    if (!isHashTag) {
       return 'Это не хэштег!';
-    } else if (tag.length === 1) {
+    } else if (isTagTooShort) {
       return 'Хэштег не может состоять только из «' + TAG_SYMBOL + '»';
-    } else {
-      var tagText = tag.slice(1);
-      if (wrongSymbolsRegExp.test(tagText)) {
-        return 'Хэштег ' + tag + ' введен некорректно';
-      }
+    } else if (isWrongTag) {
+      return 'Хэштег ' + tag + ' введен некорректно';
     }
 
-    if (splittedTags[i].length > TAG_MAX_LENGTH) {
+    if (isTagTooLong) {
       return 'Хэштег ' + tag + ' слишком длинный (лишние ' + (tag.length - TAG_MAX_LENGTH) + ' симв.)';
     }
 
-    if (acceptedTags.indexOf(tag) !== -1) {
+    if (isTagExists) {
       return 'Хэштег ' + tag + ' уже введен';
     } else {
       acceptedTags.push(tag);
@@ -326,21 +376,42 @@ var onTagsInput = function () {
   tagsInputField.reportValidity();
 };
 
+/* description */
+
+var isDescriptionEndSoon = function (length) {
+  return length > MAX_DESRIPTION_THRESHOLD && length < MAX_DESCRIPTION_LENGTH;
+};
+
+var getDescriptionValidityMessage = function (description) {
+  if (isDescriptionEndSoon(description.length)) {
+    return 'Вы можете добавить в описанисе еще ' + (MAX_DESCRIPTION_LENGTH - description.length) + ' симв.';
+  }
+
+  return '';
+};
+
+var onDescriptionInput = function () {
+  var description = descriptionInputField.value;
+
+  descriptionInputField.setCustomValidity(getDescriptionValidityMessage(description));
+  descriptionInputField.reportValidity();
+};
+
 /* move */
 
 var fadePictureEffect = function (value) {
   var effectClass = (uploadedPicturePreview.className).split('--')[1];
 
   switch (effectClass) {
-    case effectNames.CHROME:
+    case EffectName.CHROME:
       return 'filter: grayscale(' + value / 100 + ')';
-    case effectNames.SEPIA:
+    case EffectName.SEPIA:
       return 'filter: sepia(' + value / 100 + ')';
-    case effectNames.MARVIN:
+    case EffectName.MARVIN:
       return 'filter: invert(' + value + '%)';
-    case effectNames.PHOBOS:
+    case EffectName.PHOBOS:
       return 'filter: blur(' + Math.floor(3 * value / 100) + 'px)';
-    case effectNames.HEAT:
+    case EffectName.HEAT:
       return 'filter: brightness(' + (Math.floor(value / 50) + 1) + ')';
   }
 
@@ -349,15 +420,18 @@ var fadePictureEffect = function (value) {
 
 var moveEffectLevelLever = function (offset) {
   var effectLevelBarWidth = effectLevelBar.offsetWidth;
+  var isFullWidth = offset === effectLevelBarWidth;
 
-  if (offset === effectLevelBarWidth) {
+  if (isFullWidth) {
     var newEffectValue = DEFAULT_EFFECT_VALUE;
   } else {
     newEffectValue = Math.round((effectLevelDepth.offsetWidth - offset) * 100 / effectLevelBarWidth);
+    var isNewValueLessMin = newEffectValue < 0;
+    var isNewValueMoreMax = newEffectValue > DEFAULT_EFFECT_VALUE;
 
-    if (newEffectValue < 0) {
+    if (isNewValueLessMin) {
       newEffectValue = 0;
-    } else if (newEffectValue > DEFAULT_EFFECT_VALUE) {
+    } else if (isNewValueMoreMax) {
       newEffectValue = DEFAULT_EFFECT_VALUE;
     }
   }
@@ -394,11 +468,12 @@ var onEffectLevelLeverPress = function (evt) {
 
 var applyPictureEffect = function (effectName) {
   var effectClass = 'effects__preview--' + effectName;
+  var isDefaultEffect = effectName === DEFAULT_EFFECT;
 
   uploadedPicturePreview.className = '';
   uploadedPicturePreview.classList.add(effectClass);
 
-  if (effectName === DEFAULT_EFFECT) {
+  if (isDefaultEffect) {
     effectLevelSlider.classList.add('hidden');
   } else {
     effectLevelSlider.classList.remove('hidden');
@@ -419,13 +494,15 @@ var onEffectPress = function (evt) {
 
 var changePictureScale = function (increase) {
   var scale = (scaleField.value).replace(/\D+/, '') * 1;
+  var isScaleLessMax = scale < MAX_SCALE;
+  var isScaleMoreMin = scale > MIN_SCALE;
 
   if (increase) {
-    if (scale < MAX_SCALE) {
+    if (isScaleLessMax) {
       scale += SCALE_STEP;
     }
   } else {
-    if (scale > MIN_SCALE) {
+    if (isScaleMoreMin) {
       scale -= SCALE_STEP;
     }
   }
@@ -435,19 +512,26 @@ var changePictureScale = function (increase) {
 };
 
 var onScalePress = function (evt) {
-  if (evt.target === scaleSmallerButton) {
+  var isSmallerButton = evt.target === scaleSmallerButton;
+  var isBiggerButton = evt.target === scaleBiggerButon;
+
+  if (isSmallerButton) {
     changePictureScale();
   }
 
-  if (evt.target === scaleBiggerButon) {
+  if (isBiggerButton) {
     changePictureScale(true);
   }
 };
 
 /* upload */
 
-var onPopupEscPress = function (evt) {
-  if (evt.key === 'Escape' && evt.target !== tagsInputField) {
+var isEscNotInput = function (evt) {
+  return evt.key === 'Escape' && evt.target !== tagsInputField && evt.target !== descriptionInputField;
+};
+
+var onUploadWindowEscPress = function (evt) {
+  if (isEscNotInput(evt)) {
     evt.preventDefault();
 
     closeUploadWindow();
@@ -455,26 +539,29 @@ var onPopupEscPress = function (evt) {
 };
 
 var openUploadWindow = function () {
-  modalUploadWindow.classList.remove('hidden');
+  uploadWindow.classList.remove('hidden');
 
   setBodyStatus(true);
   applyPictureEffect(DEFAULT_EFFECT);
 
-  document.addEventListener('keydown', onPopupEscPress);
+  document.addEventListener('keydown', onUploadWindowEscPress);
   scaleControls.addEventListener('click', onScalePress);
-  effectsList.addEventListener('click', onEffectPress);
   tagsInputField.addEventListener('input', onTagsInput);
+  descriptionInputField.addEventListener('input', onDescriptionInput);
+  effectsList.addEventListener('click', onEffectPress);
   effectLevelLever.addEventListener('mousedown', onEffectLevelLeverPress);
 };
 
 var closeUploadWindow = function () {
-  modalUploadWindow.classList.add('hidden');
+  uploadWindow.classList.add('hidden');
   uploadPictureField.value = '';
 
   setBodyStatus();
 
-  document.removeEventListener('keydown', onPopupEscPress);
+  document.removeEventListener('keydown', onUploadWindowEscPress);
   scaleControls.removeEventListener('click', onScalePress);
+  tagsInputField.removeEventListener('input', onTagsInput);
+  descriptionInputField.removeEventListener('input', onDescriptionInput);
   effectsList.removeEventListener('click', onEffectPress);
   effectLevelLever.removeEventListener('mousedown', onEffectLevelLeverPress);
 };
