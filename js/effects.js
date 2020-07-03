@@ -20,7 +20,7 @@
 
   var scaleControls = uploadWindow.querySelector('.img-upload__scale');
   var scaleSmallerButton = scaleControls.querySelector('.scale__control--smaller');
-  var scaleBiggerButon = scaleControls.querySelector('.scale__control--bigger');
+  var scaleBiggerButton = scaleControls.querySelector('.scale__control--bigger');
   var scaleField = scaleControls.querySelector('.scale__control--value');
 
   var effectLevelSlider = uploadWindow.querySelector('.effect-level');
@@ -162,7 +162,7 @@
     },
     onScaleClick: function (evt) {
       var isSmallerButton = evt.target === scaleSmallerButton;
-      var isBiggerButton = evt.target === scaleBiggerButon;
+      var isBiggerButton = evt.target === scaleBiggerButton;
 
       if (isSmallerButton) {
         changePictureScale();

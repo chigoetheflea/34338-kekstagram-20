@@ -31,7 +31,7 @@
     return comment;
   };
 
-  var renderBigPicturelContent = function (data) {
+  var renderBigPictureContent = function (data) {
     bigPicture.src = data.url;
     bigPicture.alt = data.description;
 
@@ -67,7 +67,7 @@
   };
 
   window.openBigPictureWindow = function (data) {
-    renderBigPicturelContent(data);
+    renderBigPictureContent(data);
 
     window.support.setBodyStatus(true);
 

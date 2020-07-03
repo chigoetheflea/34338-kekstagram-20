@@ -36,8 +36,8 @@
   ];
 
   var COMMENTS_COUNT = 5;
-  var MIN_COMMENT_SENTENSES = 1;
-  var MAX_COMMENT_SENTENSES = 2;
+  var MIN_COMMENT_SENTENCES = 1;
+  var MAX_COMMENT_SENTENCES = 2;
   var MIN_AVATAR_NUMBER = 1;
   var MAX_AVATAR_NUMBER = 6;
   var MIN_LIKES = 15;
@@ -45,7 +45,7 @@
 
   var getMessage = function (count) {
     var firstSentence = window.support.getRandomValue(COMMENT_MESSAGES);
-    var isMaxCommentSentenses = count === MAX_COMMENT_SENTENSES;
+    var isMaxCommentSentenses = count === MAX_COMMENT_SENTENCES;
 
     if (isMaxCommentSentenses) {
       do {
@@ -61,7 +61,7 @@
   var getComments = function () {
     var comments = [];
     var commentsRandomCount = window.support.getRandomNumber(0, COMMENTS_COUNT);
-    var sentensesCount = Math.random() > 0.5 ? MAX_COMMENT_SENTENSES : MIN_COMMENT_SENTENSES;
+    var sentensesCount = Math.random() > 0.5 ? MAX_COMMENT_SENTENCES : MIN_COMMENT_SENTENCES;
 
     for (var i = 0; i < commentsRandomCount; i++) {
       var commentsItem = {

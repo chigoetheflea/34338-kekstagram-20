@@ -10,7 +10,7 @@
   var descriptionInputField = document.querySelector('.text__description');
 
   var isEscNotInput = function (evt) {
-    return evt.key === 'Escape' && evt.target !== tagsInputField && evt.target !== descriptionInputField;
+    return evt.key === Key.ESC && evt.target !== tagsInputField && evt.target !== descriptionInputField;
   };
 
   window.utility = {

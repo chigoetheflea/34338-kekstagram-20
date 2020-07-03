@@ -34,9 +34,13 @@
 
         if (!isHashTag) {
           return 'Это не хэштег!';
-        } else if (isTagTooShort) {
+        }
+
+        if (isTagTooShort) {
           return 'Хэштег не может состоять только из «' + TAG_SYMBOL + '»';
-        } else if (isWrongTag) {
+        }
+
+        if (isWrongTag) {
           return 'Хэштег ' + tag + ' введен некорректно';
         }
 
@@ -46,16 +50,16 @@
 
         if (isTagExists) {
           return 'Хэштег ' + tag + ' уже введен';
-        } else {
-          acceptedTags.push(tag);
         }
+
+        acceptedTags.push(tag);
       }
 
       return '';
     },
     getDescriptionValidityMessage: function (description) {
       if (isDescriptionEndsSoon(description.length)) {
-        return 'Вы можете добавить в описанисе еще ' + (MAX_DESCRIPTION_LENGTH - description.length) + ' симв.';
+        return 'Вы можете добавить в описание еще ' + (MAX_DESCRIPTION_LENGTH - description.length) + ' симв.';
       }
 
       return '';
