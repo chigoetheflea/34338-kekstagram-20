@@ -27,9 +27,9 @@
       }
     },
     isSimpleEscEvent: function (evt, action) {
-      var isEsc = evt.key === Key.ESC;
+      var isEscape = evt.key === Key.ESC;
 
-      if (isEsc) {
+      if (isEscape) {
         action();
       }
     }
