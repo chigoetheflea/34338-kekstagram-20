@@ -63,9 +63,9 @@
       case EffectName.MARVIN:
         return 'filter: invert(' + value + '%)';
       case EffectName.PHOBOS:
-        return 'filter: blur(' + Math.floor(3 * value / 100) + 'px)';
+        return 'filter: blur(' + (value / 33).toFixed(1) + 'px)';
       case EffectName.HEAT:
-        return 'filter: brightness(' + (Math.floor(value / 50) + 1) + ')';
+        return 'filter: brightness(' + (value / 50 + 1).toFixed(1) + ')';
     }
 
     return '';
