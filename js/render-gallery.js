@@ -1,10 +1,14 @@
 'use strict';
 
 (function () {
-  var IMAGES_COUNT = 25;
+  var picturesContainer = document.querySelector('.pictures');
 
-  var imagesData = window.support.getShuffledArray(window.generateInfo(IMAGES_COUNT));
-  var pictureTemplate = document.querySelector('#picture').content.querySelector('.picture');
+  var showError = function (response) {
+    var result = document.createElement('p');
+
+    result.textContent = response;
+    picturesContainer.appendChild(result);
+  };
 
   var renderPicture = function (imageData, template) {
     var imageElement = template.cloneNode(true);
@@ -26,11 +30,17 @@
     return fragment;
   };
 
-  document.querySelector('.pictures').appendChild(renderGallery(imagesData, pictureTemplate));
+  var showGallery = function (imagesData) {
+    var pictureTemplate = document.querySelector('#picture').content.querySelector('.picture');
 
-  var pictures = document.querySelectorAll('.picture');
+    picturesContainer.appendChild(renderGallery(imagesData, pictureTemplate));
 
-  for (var i = 0; i < pictures.length; i++) {
-    pictures[i].addEventListener('click', window.openBigPictureWindow.bind(null, imagesData[i]));
-  }
+    var pictures = document.querySelectorAll('.picture');
+
+    for (var i = 0; i < pictures.length; i++) {
+      pictures[i].addEventListener('click', window.openBigPictureWindow.bind(null, imagesData[i]));
+    }
+  };
+
+  window.backend.load(showGallery, showError);
 })();
