@@ -2,10 +2,11 @@
 
 (function () {
   var DEFAULT_EFFECT = 'none';
+  var DEFAULT_EFFECT_VALUE = 100;
   var MIN_SCALE = 25;
   var MAX_SCALE = 100;
+  var DEFAULT_SCALE_VALUE = '100%';
   var SCALE_STEP = 25;
-  var DEFAULT_EFFECT_VALUE = 100;
 
   var EffectName = {
     CHROME: 'chrome',
@@ -171,6 +172,7 @@
       if (isBiggerButton) {
         changePictureScale(true);
       }
-    }
+    },
+    defaultScaleValue: DEFAULT_SCALE_VALUE
   };
 })();
