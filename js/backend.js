@@ -12,7 +12,8 @@
   };
 
   var Url = {
-    IN: 'https://javascript.pages.academy/kekstagram/data'
+    IN: 'https://javascript.pages.academy/kekstagram/data',
+    OUT: 'https://javascript.pages.academy/kekstagram'
   };
 
   var ErrorMessage = {
@@ -59,6 +60,26 @@
     onError(ErrorMessage.TIMEOUT + timeout + TIMEOUT_UNIT);
   };
 
+  var onDataToServerLoad = function (xhr, onLoad, onError) {
+    if (isLoad(xhr)) {
+      onLoad();
+    } else {
+      onError(getErrorMessage(xhr.status, xhr.statusText));
+    }
+
+    xhr.removeEventListener('load', onDataToServerLoad);
+    xhr.removeEventListener('error', onDataToServerErrorOccures);
+    xhr.removeEventListener('timeout', onDataToServerTimesUp);
+  };
+
+  var onDataToServerErrorOccures = function (onError) {
+    onError(ErrorMessage.CONNECTION_LOST);
+  };
+
+  var onDataToServerTimesUp = function (timeout, onError) {
+    onError(ErrorMessage.TIMEOUT + timeout + TIMEOUT_UNIT);
+  };
+
   var createXHR = function () {
     var xhr = new XMLHttpRequest();
 
@@ -78,6 +99,16 @@
 
       xhr.open('GET', Url.IN);
       xhr.send();
+    },
+    save: function (data, onLoad, onError) {
+      var xhr = createXHR();
+
+      xhr.addEventListener('load', onDataToServerLoad.bind(null, xhr, onLoad, onError));
+      xhr.addEventListener('error', onDataToServerErrorOccures.bind(null, onError));
+      xhr.addEventListener('timeout', onDataToServerTimesUp.bind(null, xhr.timeout, onError));
+
+      xhr.open('POST', Url.OUT);
+      xhr.send(data);
     }
   };
 })();
