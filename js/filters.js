@@ -8,9 +8,9 @@
   var filtersForm = filters.querySelector('.img-filters__form');
   var filterButtons = filtersForm.querySelectorAll('.img-filters__button');
 
-  var filterDefault = filtersForm.querySelector('#filter-default');
-  var filterRandom = filtersForm.querySelector('#filter-random');
-  var filterDiscussed = filtersForm.querySelector('#filter-discussed');
+  var defaultFilter = filtersForm.querySelector('#filter-default');
+  var randomFilter = filtersForm.querySelector('#filter-random');
+  var discussedFilter = filtersForm.querySelector('#filter-discussed');
 
   var defaultData = null;
 
@@ -35,29 +35,29 @@
   };
 
   var applyFilter = function (data, evt) {
-    var isDefault = evt.target === filterDefault;
-    var isRandom = evt.target === filterRandom;
-    var isDiscussed = evt.target === filterDiscussed;
+    var isRandom = evt.target === randomFilter;
+    var isDiscussed = evt.target === discussedFilter;
 
-    window.gallery.clear();
-
-    if (isDefault) {
-      window.gallery.show(defaultData);
-
-      setActiveStatus(filterDefault);
-    }
+    var activeGallery = defaultData;
+    var activeFilter = defaultFilter;
 
     if (isRandom) {
-      window.gallery.show(window.support.getShuffledArray(data).slice(0, RANDOM_IMAGES_COUNT));
+      activeGallery = window.support.getShuffledArray(data).slice(0, RANDOM_IMAGES_COUNT);
 
-      setActiveStatus(filterRandom);
+      activeFilter = randomFilter;
     }
 
     if (isDiscussed) {
-      window.gallery.show(data.sort(sortImages));
+      activeGallery = data.sort(sortImages);
 
-      setActiveStatus(filterDiscussed);
+      activeFilter = discussedFilter;
     }
+
+    window.gallery.clear();
+
+    window.gallery.show(activeGallery);
+
+    setActiveStatus(activeFilter);
   };
 
   var onFilterClick = function (data, evt) {
