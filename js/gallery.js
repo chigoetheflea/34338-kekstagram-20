@@ -3,13 +3,6 @@
 (function () {
   var picturesContainer = document.querySelector('.pictures');
 
-  var showError = function (response) {
-    var result = document.createElement('p');
-
-    result.textContent = response;
-    picturesContainer.appendChild(result);
-  };
-
   var renderPicture = function (imageData, template) {
     var imageElement = template.cloneNode(true);
 
@@ -30,17 +23,24 @@
     return fragment;
   };
 
-  var showGallery = function (imagesData) {
-    var pictureTemplate = document.querySelector('#picture').content.querySelector('.picture');
+  window.gallery = {
+    show: function (data) {
+      var pictureTemplate = document.querySelector('#picture').content.querySelector('.picture');
 
-    picturesContainer.appendChild(renderGallery(imagesData, pictureTemplate));
+      picturesContainer.appendChild(renderGallery(data, pictureTemplate));
 
-    var pictures = document.querySelectorAll('.picture');
+      var pictures = picturesContainer.querySelectorAll('.picture');
 
-    for (var i = 0; i < pictures.length; i++) {
-      pictures[i].addEventListener('click', window.openBigPictureWindow.bind(null, imagesData[i]));
+      for (var i = 0; i < pictures.length; i++) {
+        pictures[i].addEventListener('click', window.openBigPictureWindow.bind(null, data[i]));
+      }
+    },
+    clear: function () {
+      var pictures = picturesContainer.querySelectorAll('.picture');
+
+      pictures.forEach(function (element) {
+        element.remove();
+      });
     }
   };
-
-  window.backend.load(showGallery, showError);
 })();
