@@ -1,6 +1,8 @@
 'use strict';
 
 (function () {
+  var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
+
   var uploadPictureField = document.querySelector('#upload-file');
 
   var uploadForm = document.querySelector('.img-upload__form');
@@ -42,7 +44,34 @@
     window.utility.isEscEvent(evt, closeUploadWindow);
   };
 
+  var isFileValid = function (fileToTest) {
+    return FILE_TYPES.some(function (element) {
+      return fileToTest.endsWith(element);
+    });
+  };
+
+  var onFileLoad = function (reader) {
+    uploadedPicturePreview.src = reader.result;
+
+    reader.removeEventListener('load', onFileLoad);
+  };
+
+  var showUploadedFilePreview = function () {
+    var uploadedFile = uploadPictureField.files[0];
+    var uploadedFileName = uploadedFile.name.toLowerCase();
+
+    if (isFileValid(uploadedFileName)) {
+      var reader = new FileReader();
+
+      reader.addEventListener('load', onFileLoad.bind(null, reader));
+
+      reader.readAsDataURL(uploadedFile);
+    }
+  };
+
   var openUploadWindow = function () {
+    showUploadedFilePreview();
+
     uploadWindow.classList.remove('hidden');
 
     window.support.setBodyStatus(true);
