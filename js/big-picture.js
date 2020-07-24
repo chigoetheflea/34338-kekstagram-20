@@ -68,9 +68,9 @@
 
     var commentsFragment = document.createDocumentFragment();
 
-    for (var i = 0; i < data.comments.length; i++) {
-      commentsFragment.appendChild(renderComment(data.comments[i]));
-    }
+    data.comments.forEach(function (element) {
+      commentsFragment.appendChild(renderComment(element));
+    });
 
     commentsCountContainer.classList.add('hidden');
     moreCommentsButton.classList.add('hidden');

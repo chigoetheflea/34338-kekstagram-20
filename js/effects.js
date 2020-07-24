@@ -35,19 +35,19 @@
 
     if (currentStyle) {
       var currentSplittedStyle = window.support.deleteArrayElements(currentStyle.split(';'), '');
-      var newStyle = [];
+      var newStyles = [];
 
-      for (var i = 0; i < currentSplittedStyle.length; i++) {
-        var isCurrentStyleIncludes = currentSplittedStyle[i].includes(type);
+      currentSplittedStyle.forEach(function (element) {
+        var isCurrentStyleIncludes = element.includes(type);
 
         if (!isCurrentStyleIncludes) {
-          newStyle.push(currentSplittedStyle[i] + ';');
+          newStyles.push(element + ';');
         }
-      }
+      });
 
-      newStyle.push(style + ';');
+      newStyles.push(style + ';');
 
-      return newStyle.join('');
+      return newStyles.join('');
     }
 
     return style;
