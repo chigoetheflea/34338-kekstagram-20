@@ -13,25 +13,31 @@
     return evt.key === Key.ESC && evt.target !== tagsInputField && evt.target !== descriptionInputField;
   };
 
-  window.utility = {
-    isEnterEvent: function (evt, action) {
-      var isEnter = evt.key === Key.ENTER;
+  var isEnterEvent = function (evt, action) {
+    var isEnter = evt.key === Key.ENTER;
 
-      if (isEnter) {
-        action();
-      }
-    },
-    isEscEvent: function (evt, action) {
-      if (isEscNotInput(evt)) {
-        action();
-      }
-    },
-    isSimpleEscEvent: function (evt, action) {
-      var isEscape = evt.key === Key.ESC;
-
-      if (isEscape) {
-        action();
-      }
+    if (isEnter) {
+      action();
     }
+  };
+
+  var isEscEvent = function (evt, action) {
+    if (isEscNotInput(evt)) {
+      action();
+    }
+  };
+
+  var isSimpleEscEvent = function (evt, action) {
+    var isEscape = evt.key === Key.ESC;
+
+    if (isEscape) {
+      action();
+    }
+  };
+
+  window.utility = {
+    isEnterEvent: isEnterEvent,
+    isEscEvent: isEscEvent,
+    isSimpleEscEvent: isSimpleEscEvent
   };
 })();

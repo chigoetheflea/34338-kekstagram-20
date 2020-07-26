@@ -2,7 +2,6 @@
 
 (function () {
   var DEFAULT_EFFECT = 'none';
-  var DEFAULT_EFFECT_VALUE = 100;
   var MIN_SCALE = 25;
   var MAX_SCALE = 100;
   var DEFAULT_SCALE_VALUE = '100%';
@@ -58,43 +57,45 @@
 
     switch (effectClass) {
       case EffectName.CHROME:
-        return 'filter: grayscale(' + value / 100 + ')';
+        return 'filter: grayscale(' + value + ')';
       case EffectName.SEPIA:
-        return 'filter: sepia(' + value / 100 + ')';
+        return 'filter: sepia(' + value + ')';
       case EffectName.MARVIN:
-        return 'filter: invert(' + value + '%)';
+        return 'filter: invert(' + 100 * value + '%)';
       case EffectName.PHOBOS:
-        return 'filter: blur(' + (value / 33).toFixed(1) + 'px)';
+        return 'filter: blur(' + 3 * value + 'px)';
       case EffectName.HEAT:
-        return 'filter: brightness(' + (value / 50 + 1).toFixed(1) + ')';
+        return 'filter: brightness(' + (2 * value + 1) + ')';
     }
 
     return '';
   };
 
-  var moveEffectLevelLever = function (offset) {
-    var effectLevelBarWidth = effectLevelBar.offsetWidth;
-    var isFullWidth = offset === effectLevelBarWidth;
+  var moveEffectLevelLever = function (newOffset, rightThreshold) {
+    var isNewValueLessMin = newOffset < 0;
+    var isNewValueMoreMax = newOffset > rightThreshold;
+    var newEffectValue = 0;
 
-    if (isFullWidth) {
-      var newEffectValue = DEFAULT_EFFECT_VALUE;
-    } else {
-      newEffectValue = Math.round((effectLevelDepth.offsetWidth - offset) * 100 / effectLevelBarWidth);
-
-      var isNewValueLessMin = newEffectValue < 0;
-      var isNewValueMoreMax = newEffectValue > DEFAULT_EFFECT_VALUE;
-
-      if (isNewValueLessMin) {
-        newEffectValue = 0;
-      } else if (isNewValueMoreMax) {
-        newEffectValue = DEFAULT_EFFECT_VALUE;
-      }
+    if (!rightThreshold) {
+      rightThreshold = newOffset;
     }
 
-    effectLevelDepth.style.width = newEffectValue + '%';
-    effectLevelLever.style.left = newEffectValue + '%';
+    if (isNewValueLessMin) {
+      newOffset = 0;
+    }
 
-    effectLevelField.value = newEffectValue;
+    if (isNewValueMoreMax) {
+      newOffset = rightThreshold;
+    }
+
+    newOffset = Math.round(newOffset);
+
+    effectLevelDepth.style.width = newOffset + 'px';
+    effectLevelLever.style.left = newOffset + 'px';
+
+    newEffectValue = newOffset / rightThreshold;
+
+    effectLevelField.setAttribute('value', Math.round(newEffectValue * 100));
 
     uploadedPicturePreview.style = getPictureStyleAtt(fadePictureEffect(newEffectValue), 'filter');
   };
@@ -115,7 +116,8 @@
     }
 
     uploadedPicturePreview.style = getPictureStyleAtt('transform: scale(' + scale * 0.01 + ')', 'transform');
-    scaleField.value = scale + '%';
+
+    scaleField.setAttribute('value', scale + '%');
   };
 
   var applyPictureEffect = function (effectName) {
@@ -134,45 +136,52 @@
     moveEffectLevelLever(effectLevelBar.offsetWidth);
   };
 
+  var onEffectLevelLeverClick = function (leftTreshold, evt) {
+    var effectLevelLeverLeft = effectLevelLever.getBoundingClientRect().left;
+    var rightThreshold = effectLevelBar.offsetWidth;
+
+    var startOffset = evt.pageX - effectLevelLeverLeft;
+
+    var onEffectLevelLeverMove = function (evtMove) {
+      var newOffset = evtMove.pageX - leftTreshold - startOffset;
+
+      moveEffectLevelLever(newOffset, rightThreshold);
+    };
+
+    var onEffectLevelLeverRelease = function () {
+      document.removeEventListener('mousemove', onEffectLevelLeverMove);
+      document.removeEventListener('mouseup', onEffectLevelLeverRelease);
+    };
+
+    document.addEventListener('mousemove', onEffectLevelLeverMove);
+    document.addEventListener('mouseup', onEffectLevelLeverRelease);
+  };
+
+  var onEffectClick = function (evt) {
+    var effectsItemID = evt.target.id;
+
+    if (effectsItemID) {
+      applyPictureEffect(effectsItemID.split('-')[1]);
+    }
+  };
+
+  var onScaleClick = function (evt) {
+    var isSmallerButton = evt.target === scaleSmallerButton;
+    var isBiggerButton = evt.target === scaleBiggerButton;
+
+    if (isSmallerButton) {
+      changePictureScale();
+    }
+
+    if (isBiggerButton) {
+      changePictureScale(true);
+    }
+  };
+
   window.effects = {
-    onEffectLevelLeverClick: function (evt) {
-      var startOffset = evt.clientX;
-
-      var onEffectLevelLeverMove = function (evtMove) {
-        var newOffset = evtMove.clientX;
-
-        moveEffectLevelLever(startOffset - newOffset);
-
-        startOffset = newOffset;
-      };
-
-      var onEffectLevelLeverRelease = function () {
-        document.removeEventListener('mousemove', onEffectLevelLeverMove);
-        document.removeEventListener('mouseup', onEffectLevelLeverRelease);
-      };
-
-      document.addEventListener('mousemove', onEffectLevelLeverMove);
-      document.addEventListener('mouseup', onEffectLevelLeverRelease);
-    },
-    onEffectClick: function (evt) {
-      var effectsItemID = evt.target.id;
-
-      if (effectsItemID) {
-        applyPictureEffect(effectsItemID.split('-')[1]);
-      }
-    },
-    onScaleClick: function (evt) {
-      var isSmallerButton = evt.target === scaleSmallerButton;
-      var isBiggerButton = evt.target === scaleBiggerButton;
-
-      if (isSmallerButton) {
-        changePictureScale();
-      }
-
-      if (isBiggerButton) {
-        changePictureScale(true);
-      }
-    },
+    onEffectLevelLeverClick: onEffectLevelLeverClick,
+    onEffectClick: onEffectClick,
+    onScaleClick: onScaleClick,
     defaultScaleValue: DEFAULT_SCALE_VALUE
   };
 })();

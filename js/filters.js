@@ -61,10 +61,10 @@
   };
 
   var onFilterClick = function (data, evt) {
-    window.debounce(applyFilter.bind(null, data, evt));
+    window.debounce.set(applyFilter.bind(null, data, evt));
   };
 
-  window.filtersInit = function (data) {
+  var initFilters = function (data) {
     window.gallery.show(data);
 
     defaultData = data.slice();
@@ -72,5 +72,9 @@
     filters.classList.remove('img-filters--inactive');
 
     filtersForm.addEventListener('click', onFilterClick.bind(null, data));
+  };
+
+  window.filters = {
+    init: initFilters
   };
 })();

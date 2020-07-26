@@ -15,9 +15,10 @@
   var scaleField = scaleControls.querySelector('.scale__control--value');
 
   var effectsList = uploadWindow.querySelector('.effects__list');
+  var effectLevelSlider = uploadWindow.querySelector('.effect-level');
   var effectLevelField = uploadWindow.querySelector('.effect-level__value');
   var effectLevelLever = uploadWindow.querySelector('.effect-level__pin');
-  var effectLevelSlider = uploadWindow.querySelector('.effect-level');
+  var effectLevelBar = effectLevelSlider.querySelector('.effect-level__line');
   var defaultEffect = effectsList.querySelector('#effect-none');
 
   var tagsInputField = uploadWindow.querySelector('.text__hashtags');
@@ -74,6 +75,8 @@
 
     uploadWindow.classList.remove('hidden');
 
+    var effectLevelBarLeft = window.support.getElementLeftOffset(effectLevelBar);
+
     window.support.setBodyStatus(true);
     effectLevelSlider.classList.add('hidden');
 
@@ -82,7 +85,7 @@
     tagsInputField.addEventListener('input', onTagsInput);
     descriptionInputField.addEventListener('input', onDescriptionInput);
     effectsList.addEventListener('click', window.effects.onEffectClick);
-    effectLevelLever.addEventListener('mousedown', window.effects.onEffectLevelLeverClick);
+    effectLevelLever.addEventListener('mousedown', window.effects.onEffectLevelLeverClick.bind(null, effectLevelBarLeft));
     uploadWindowCloseButton.addEventListener('click', onUploadWindowCloseClick);
     uploadForm.addEventListener('submit', onUploadFormSubmit);
   };

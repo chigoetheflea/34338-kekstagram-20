@@ -11,7 +11,7 @@
   };
 
   var receiveData = function (data) {
-    window.filtersInit(data);
+    window.filters.init(data);
   };
 
   window.backend.load(receiveData, showError);

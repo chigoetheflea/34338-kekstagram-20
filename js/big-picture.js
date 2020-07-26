@@ -48,7 +48,7 @@
       moreCommentsButton.classList.add('hidden');
     }
 
-    commentsCountContainer.innerHTML = (commentsAllLength - (commentsToShow.length - currentCommentsPortion)) + ' из <span class="comments-count">' + commentsAllLength + '</span> комментариев';
+    commentsCountContainer.textContent = (commentsAllLength - (commentsToShow.length - currentCommentsPortion)) + ' из ' + commentsAllLength + ' комментариев';
   };
 
   var onMoreCommentsButtonClick = function () {
@@ -103,7 +103,7 @@
     closeBigPictureWindow();
   };
 
-  window.openBigPictureWindow = function (data) {
+  var openBigPictureWindow = function (data) {
     renderBigPictureContent(data);
 
     window.support.setBodyStatus(true);
@@ -114,5 +114,9 @@
 
     document.addEventListener('keydown', onBigPictureWindowEscPress);
     bigPictureCancelButton.addEventListener('click', onBigPictureWindowCancelClick);
+  };
+
+  window.bigPicture = {
+    openWindow: openBigPictureWindow
   };
 })();

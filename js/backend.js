@@ -40,75 +40,51 @@
     return xhr.status === StatusCode.OK;
   };
 
-  var onDataFromServerLoad = function (xhr, onLoad, onError) {
+  var onDataLoad = function (xhr, onLoad, onError) {
     if (isLoad(xhr)) {
       onLoad(xhr.response);
     } else {
       onError(getErrorMessage(xhr.status, xhr.statusText));
     }
-
-    xhr.removeEventListener('load', onDataFromServerLoad);
-    xhr.removeEventListener('error', onDataFromServerErrorOccures);
-    xhr.removeEventListener('timeout', onDataFromServerTimesUp);
   };
 
-  var onDataFromServerErrorOccures = function (onError) {
+  var onRequestErrorOccures = function (onError) {
     onError(ErrorMessage.CONNECTION_LOST);
   };
 
-  var onDataFromServerTimesUp = function (timeout, onError) {
+  var onRequestServerTimesUp = function (timeout, onError) {
     onError(ErrorMessage.TIMEOUT + timeout + TIMEOUT_UNIT);
   };
 
-  var onDataToServerLoad = function (xhr, onLoad, onError) {
-    if (isLoad(xhr)) {
-      onLoad();
-    } else {
-      onError(getErrorMessage(xhr.status, xhr.statusText));
-    }
-
-    xhr.removeEventListener('load', onDataToServerLoad);
-    xhr.removeEventListener('error', onDataToServerErrorOccures);
-    xhr.removeEventListener('timeout', onDataToServerTimesUp);
-  };
-
-  var onDataToServerErrorOccures = function (onError) {
-    onError(ErrorMessage.CONNECTION_LOST);
-  };
-
-  var onDataToServerTimesUp = function (timeout, onError) {
-    onError(ErrorMessage.TIMEOUT + timeout + TIMEOUT_UNIT);
-  };
-
-  var createXHR = function () {
+  var createXHR = function (onLoad, onError) {
     var xhr = new XMLHttpRequest();
 
     xhr.responseType = RESPONSE_TYPE;
     xhr.timeout = TIMEOUT;
 
+    xhr.addEventListener('load', onDataLoad.bind(null, xhr, onLoad, onError));
+    xhr.addEventListener('error', onRequestErrorOccures.bind(null, onError));
+    xhr.addEventListener('timeout', onRequestServerTimesUp.bind(null, xhr.timeout, onError));
+
     return xhr;
   };
 
+  var requestLoad = function (onLoad, onError) {
+    var xhr = createXHR(onLoad, onError);
+
+    xhr.open('GET', Url.IN);
+    xhr.send();
+  };
+
+  var requestSave = function (data, onLoad, onError) {
+    var xhr = createXHR(onLoad, onError);
+
+    xhr.open('POST', Url.OUT);
+    xhr.send(data);
+  };
+
   window.backend = {
-    load: function (onLoad, onError) {
-      var xhr = createXHR();
-
-      xhr.addEventListener('load', onDataFromServerLoad.bind(null, xhr, onLoad, onError));
-      xhr.addEventListener('error', onDataFromServerErrorOccures.bind(null, onError));
-      xhr.addEventListener('timeout', onDataFromServerTimesUp.bind(null, xhr.timeout, onError));
-
-      xhr.open('GET', Url.IN);
-      xhr.send();
-    },
-    save: function (data, onLoad, onError) {
-      var xhr = createXHR();
-
-      xhr.addEventListener('load', onDataToServerLoad.bind(null, xhr, onLoad, onError));
-      xhr.addEventListener('error', onDataToServerErrorOccures.bind(null, onError));
-      xhr.addEventListener('timeout', onDataToServerTimesUp.bind(null, xhr.timeout, onError));
-
-      xhr.open('POST', Url.OUT);
-      xhr.send(data);
-    }
+    load: requestLoad,
+    save: requestSave
   };
 })();
